@@ -83,6 +83,12 @@ class AMapMarker(context: Context) : ReactViewGroup(context), AMapOverlay {
             marker?.isClickable = !value
         }
 
+    var rotateAngle: Float = 0.0f
+        set(value){
+            field = value
+            marker?.rotateAngle = value
+        }
+
     var infoWindowDisabled: Boolean = false
         set(value) {
             field = value
@@ -116,7 +122,8 @@ class AMapMarker(context: Context) : ReactViewGroup(context), AMapOverlay {
                 .infoWindowEnable(!infoWindowDisabled)
                 .title(title)
                 .snippet(snippet)
-                .zIndex(zIndex))
+                .zIndex(zIndex)
+                .rotateAngle(rotateAngle))
 
         this.clickDisabled = clickDisabled
         this.active = active

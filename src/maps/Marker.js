@@ -115,6 +115,11 @@ export default class Marker extends Component<any> {
     infoWindowDisabled: PropTypes.bool,
 
     /**
+     * 旋转角度，默认为0度
+     */
+    rotateAngle: PropTypes.number,
+
+    /**
      * 点击事件
      */
     onPress: PropTypes.func,

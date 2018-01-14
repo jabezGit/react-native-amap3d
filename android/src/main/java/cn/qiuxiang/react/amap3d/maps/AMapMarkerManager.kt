@@ -100,6 +100,11 @@ internal class AMapMarkerManager : ViewGroupManager<AMapMarker>() {
         marker.infoWindowDisabled = disabled
     }
 
+    @ReactProp(name = "rotateAngle")
+    fun setRotateAngle(marker: AMapMarker, rotateAngle: Float) {
+        marker.rotateAngle = rotateAngle
+    }
+
     @ReactProp(name = "active")
     fun setSelected(marker: AMapMarker, active: Boolean) {
         marker.active = active

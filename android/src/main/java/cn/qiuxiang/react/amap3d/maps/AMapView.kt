@@ -12,6 +12,10 @@ import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 class AMapView(context: Context) : TextureMapView(context) {
     private val eventEmitter: RCTEventEmitter = (context as ThemedReactContext).getJSModule(RCTEventEmitter::class.java)
@@ -25,6 +29,8 @@ class AMapView(context: Context) : TextureMapView(context) {
 
     init {
         super.onCreate(null)
+
+
 
         map.setOnMapClickListener { latLng ->
             for (marker in markers.values) {
@@ -105,7 +111,14 @@ class AMapView(context: Context) : TextureMapView(context) {
         }
 
         map.setInfoWindowAdapter(AMapInfoWindowAdapter(context, markers))
+
+        /***
+         *  custom style
+         */
+        setMapCustomStyleFile()
+
     }
+
 
     fun emitCameraChangeEvent(event: String, position: CameraPosition?) {
         position?.let {
@@ -242,4 +255,47 @@ class AMapView(context: Context) : TextureMapView(context) {
             locationStyle.myLocationIcon(BitmapDescriptorFactory.fromResource(drawable))
         }
     }
+
+
+    private fun setMapCustomStyleFile(){
+        val styleName = "style.data"
+        var outputStream: FileOutputStream? = null
+        var inputStream: InputStream? = null
+        var filePath: String? = null
+        try {
+            inputStream = context.assets.open(styleName)
+            val b = ByteArray(inputStream!!.available())
+            inputStream.read(b)
+
+            filePath = context.filesDir.absolutePath
+            val file = File(filePath + "/" + styleName)
+            if (file.exists()) {
+                file.delete()
+            }
+            file.createNewFile()
+            outputStream = FileOutputStream(file)
+            outputStream.write(b)
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                if (inputStream != null)
+                    inputStream.close()
+
+                if (outputStream != null)
+                    outputStream.close()
+
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+
+        }
+
+        map.setCustomMapStylePath(filePath + "/" + styleName)
+
+        map.setMapCustomEnable(true)
+    }
+
+
 }

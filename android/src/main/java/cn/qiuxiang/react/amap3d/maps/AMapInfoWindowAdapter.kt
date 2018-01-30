@@ -34,6 +34,7 @@ class AMapInfoWindowAdapter(
             snippetView.maxEms = 12
             snippetView.setPadding(0, paddingTop.toInt(), 0, 0)
             snippetView.setTextColor(Color.parseColor("#757575"))
+            snippetView.setBackgroundColor(Color.parseColor("#f8c023"))
             layout.addView(snippetView)
         }
 

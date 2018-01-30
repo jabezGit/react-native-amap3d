@@ -3,6 +3,7 @@ package cn.qiuxiang.react.amap3d.maps
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.view.View
 import cn.qiuxiang.react.amap3d.toPx
 import com.amap.api.maps.AMap
@@ -10,40 +11,81 @@ import com.amap.api.maps.model.*
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.views.view.ReactViewGroup
 
-class AMapMarker(context: Context) : ReactViewGroup(context), AMapOverlay {
+/**
+ * Created by jin on 2018/1/16.
+ */
 
-    override fun update(child: View) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class AMapAircraft(context: Context) : ReactViewGroup(context), AMapOverlay {
 
-    companion object {
-        private val COLORS = mapOf(
-                "AZURE" to BitmapDescriptorFactory.HUE_AZURE,
-                "BLUE" to BitmapDescriptorFactory.HUE_BLUE,
-                "CYAN" to BitmapDescriptorFactory.HUE_CYAN,
-                "GREEN" to BitmapDescriptorFactory.HUE_GREEN,
-                "MAGENTA" to BitmapDescriptorFactory.HUE_MAGENTA,
-                "ORANGE" to BitmapDescriptorFactory.HUE_ORANGE,
-                "RED" to BitmapDescriptorFactory.HUE_RED,
-                "ROSE" to BitmapDescriptorFactory.HUE_ROSE,
-                "VIOLET" to BitmapDescriptorFactory.HUE_VIOLET,
-                "YELLOW" to BitmapDescriptorFactory.HUE_YELLOW
-        )
-    }
+    private var coordinates: ArrayList<LatLng> = ArrayList()
 
     private var icon: View? = null
     private var bitmapDescriptor: BitmapDescriptor? = null
     private var anchorU: Float = 0.5f
     private var anchorV: Float = 1f
-    var infoWindow: AMapInfoWindow? = null
+
+    var icon_me = false
+    /***
+     * gsmId
+     */
+    var gsmId = ""
+
+    var polyline: Polyline? = null
+        private set
+
+    var pathWidth: Float = 3f
+        set(value) {
+            field = value
+            polyline?.width = value
+        }
+
+    /***
+     * green color
+     */
+    var pathColor: Int = -16729328
+        set(value) {
+            field = value
+            polyline?.color = value
+        }
+
+    var geodesic: Boolean = false
+        set(value) {
+            field = value
+            polyline?.isGeodesic = value
+        }
+
+    var dashed: Boolean = false
+        set(value) {
+            field = value
+            polyline?.isDottedLine = value
+        }
+
+    var gradient: Boolean = false
+
+    fun setPathLog(coordinates: ReadableArray) {
+        if(coordinates.size()<=2) return
+        this.coordinates = ArrayList((0 until coordinates.size())
+                .map { coordinates.getMap(it) }
+                .map { LatLng(it.getDouble("latitude"), it.getDouble("longitude")) })
+
+        polyline?.points = this.coordinates
+    }
+
+
+
+    /***************************
+     * Marker
+     */
 
     var marker: Marker? = null
         private set
 
-    var position: LatLng? = null
+    var position: LatLng = LatLng(0.0,0.0)
         set(value) {
             field = value
             marker?.position = value
+            this.coordinates.add(value)
+            polyline?.points=this.coordinates;
         }
 
     var zIndex: Float = 0.0f
@@ -88,35 +130,23 @@ class AMapMarker(context: Context) : ReactViewGroup(context), AMapOverlay {
             marker?.isClickable = !value
         }
 
+    /***
+     * 添加图标的旋转角度
+     */
     var rotateAngle: Float = 0.0f
         set(value){
-            field = value
+            field = -value
             marker?.rotateAngle = value
-        }
-
-    var infoWindowDisabled: Boolean = false
-        set(value) {
-            field = value
-            marker?.isInfoWindowEnable = !value
-        }
-
-    var active: Boolean = false
-        set(value) {
-            field = value
-            if (value) {
-                marker?.showInfoWindow()
-            } else {
-                marker?.hideInfoWindow()
-            }
         }
 
     override fun addView(child: View, index: Int) {
         super.addView(child, index)
         icon = child
-        icon?.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateIcon() }
+        icon?.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->updateIcon() }
     }
 
     override fun add(map: AMap) {
+
         marker = map.addMarker(MarkerOptions()
                 .setFlat(flat)
                 .icon(bitmapDescriptor)
@@ -124,25 +154,43 @@ class AMapMarker(context: Context) : ReactViewGroup(context), AMapOverlay {
                 .draggable(draggable)
                 .position(position)
                 .anchor(anchorU, anchorV)
-                .infoWindowEnable(!infoWindowDisabled)
                 .title(title)
                 .snippet(snippet)
                 .zIndex(zIndex)
+                .infoWindowEnable(false)
                 .rotateAngle(rotateAngle))
 
-        this.clickDisabled = clickDisabled
-        this.active = active
+
+        /***
+         * set center point
+         */
+        marker?.setAnchor(0.5f,0.5f);
+
+        polyline = map.addPolyline(PolylineOptions()
+                .addAll(coordinates)
+                .color(pathColor)
+                .width(pathWidth)
+                .useGradient(gradient)
+                .geodesic(geodesic)
+                .setDottedLine(dashed)
+                .zIndex(10f))
+    }
+
+
+    override fun update(child : View) {
+        if(child is AMapAircraft){
+            child.position=position
+        }
     }
 
     override fun remove() {
         marker?.destroy()
+        polyline?.remove()
+        coordinates?.clear()
     }
 
     fun setIconColor(icon: String) {
-        bitmapDescriptor = COLORS[icon.toUpperCase()]?.let {
-            BitmapDescriptorFactory.defaultMarker(it)
-        }
-        marker?.setIcon(bitmapDescriptor)
+        // TODO
     }
 
     fun updateIcon() {

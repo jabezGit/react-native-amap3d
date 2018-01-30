@@ -1,12 +1,17 @@
 package cn.qiuxiang.react.amap3d.maps
 
 import android.content.Context
+import android.view.View
 import com.amap.api.maps.AMap
 import com.amap.api.maps.model.*
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.views.view.ReactViewGroup
 
 class AMapMultiPoint(context: Context) : ReactViewGroup(context), AMapOverlay {
+    override fun update(child: View) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private var overlay: MultiPointOverlay? = null
     private var items: ArrayList<MultiPointItem> = ArrayList()
     private var icon: BitmapDescriptor? = null

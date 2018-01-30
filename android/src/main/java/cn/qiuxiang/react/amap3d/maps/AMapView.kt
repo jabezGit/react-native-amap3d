@@ -20,6 +20,7 @@ import java.io.InputStream
 class AMapView(context: Context) : TextureMapView(context) {
     private val eventEmitter: RCTEventEmitter = (context as ThemedReactContext).getJSModule(RCTEventEmitter::class.java)
     private val markers = HashMap<String, AMapMarker>()
+    private val aircrafts = HashMap<String, AMapAircraft>()
     private val lines = HashMap<String, AMapPolyline>()
     private val locationStyle by lazy {
         val locationStyle = MyLocationStyle()
@@ -29,8 +30,6 @@ class AMapView(context: Context) : TextureMapView(context) {
 
     init {
         super.onCreate(null)
-
-
 
         map.setOnMapClickListener { latLng ->
             for (marker in markers.values) {
@@ -142,14 +141,37 @@ class AMapView(context: Context) : TextureMapView(context) {
         id?.let { eventEmitter.receiveEvent(it, name, data) }
     }
 
-    fun add(child: View) {
+    fun addOrUpdate(child: View) {
         if (child is AMapOverlay) {
-            child.add(map)
+            /***
+             * Aircraft
+             */
+            if (child is AMapAircraft) {
+                    child.add(map)
+                    aircrafts.put(child.marker?.id!!, child)
+            }
+
+            /***
+             * Marker
+             */
             if (child is AMapMarker) {
+                child.add(map)
                 markers.put(child.marker?.id!!, child)
             }
+
+            /***
+             * Polyline
+             */
             if (child is AMapPolyline) {
+                child.add(map)
                 lines.put(child.polyline?.id!!, child)
+            }
+
+            /***
+             * else polygon
+             */
+            if (child is AMapPolygon) {
+                child.add(map)
             }
         }
     }
@@ -161,7 +183,10 @@ class AMapView(context: Context) : TextureMapView(context) {
                 markers.remove(child.marker?.id)
             }
             if (child is AMapPolyline) {
-                lines.remove(child.polyline?.id)
+                //lines.remove(child.polyline?.id)
+            }
+            if (child is AMapAircraft){
+                aircrafts.remove(child.marker?.id)
             }
         }
     }
@@ -257,7 +282,7 @@ class AMapView(context: Context) : TextureMapView(context) {
     }
 
 
-    private fun setMapCustomStyleFile(){
+     fun setMapCustomStyleFile(){
         val styleName = "style.data"
         var outputStream: FileOutputStream? = null
         var inputStream: InputStream? = null

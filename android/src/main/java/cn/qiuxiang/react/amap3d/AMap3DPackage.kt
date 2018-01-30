@@ -21,6 +21,7 @@ class AMap3DPackage : ReactPackage {
         return listOf(
                 AMapViewManager(),
                 AMapMarkerManager(),
+                AMapAircraftManager(),
                 AMapInfoWindowManager(),
                 AMapPolylineManager(),
                 AMapPolygonManager(),

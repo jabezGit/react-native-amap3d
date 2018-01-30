@@ -1,6 +1,7 @@
 package cn.qiuxiang.react.amap3d.maps
 
 import android.content.Context
+import android.view.View
 import com.amap.api.maps.AMap
 import com.amap.api.maps.model.HeatmapTileProvider
 import com.amap.api.maps.model.LatLng
@@ -10,6 +11,10 @@ import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.views.view.ReactViewGroup
 
 class AMapHeatMap(context: Context) : ReactViewGroup(context), AMapOverlay {
+    override fun update(child: View) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private var overlay: TileOverlay? = null
     private var coordinates: ArrayList<LatLng> = ArrayList()
 

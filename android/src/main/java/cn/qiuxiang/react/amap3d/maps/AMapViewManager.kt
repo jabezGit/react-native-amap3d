@@ -41,7 +41,7 @@ internal class AMapViewManager : ViewGroupManager<AMapView>() {
     }
 
     override fun addView(mapView: AMapView, child: View, index: Int) {
-        mapView.add(child)
+        mapView.addOrUpdate(child)
         super.addView(mapView, child, index)
     }
 
@@ -130,7 +130,7 @@ internal class AMapViewManager : ViewGroupManager<AMapView>() {
     @ReactProp(name = "mapType")
     fun setMapType(view: AMapView, mapType: String) {
         when (mapType) {
-            "standard" -> view.map.mapType = AMap.MAP_TYPE_NORMAL
+            "standard" -> {view.map.mapType = AMap.MAP_TYPE_NORMAL;view.setMapCustomStyleFile()}
             "satellite" -> view.map.mapType = AMap.MAP_TYPE_SATELLITE
             "navigation" -> view.map.mapType = AMap.MAP_TYPE_NAVI
             "night" -> view.map.mapType = AMap.MAP_TYPE_NIGHT
